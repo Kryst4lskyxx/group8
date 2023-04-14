@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vxml version = "2.1" application="http://webhosting.voxeo.net/170418/www/root.vxml">
+
+<property name="inputmodes" value="dtmf"/> <!-- set input to DTMF-->
+
+<!-- event for product selection-->
+<catch event="bag_product_selected"> 
+<prompt>
+.
+</prompt>
+<assign name="product" expr="_message"/>
+<assign name="units" expr="'bags'"/>
+<goto next="#details"/>
+</catch>
+
+<!-- end event-->
+<catch event="end"> 
+ <disconnect/> 
+</catch>
+
+<!-- main menu-->
+<menu id="menu_product" scope="dialog">
+<prompt>
+<break time="1000"/>
+Please add information for your product
+</prompt>
+
+
+<!-- product list-->
+<prompt>
+<enumerate>
+<break time="1000"/>
+For <value expr="_prompt"/>, Press <value expr="_dtmf"/>
+</enumerate>
+</prompt>
+
+<!-- comment -->
+<choice event="bag_product_selected" dtmf="1" message="Yam">Yam</choice>
+<choice event="bag_product_selected" dtmf="2" message="Soybeans">Soy beans</choice>
+<choice event="kg_product_selected" dtmf="3" message="Maize">Maize</choice>
+<choice event="bag_product_selected" dtmf="4" message="Pepper">Pepper</choice>
+<choice event="bag_product_selected" dtmf="5" message="Rice">Rice</choice>
+
+</menu>
+
+<!-- main form-->
+<form id="details">
+      <field name="form_quantity" type="number">
+         <prompt>
+            How many <value expr="units"/> of <value expr="product"/>?
+		Enter the quantity and press hash
+         </prompt>
+   	<filled>
+ 	<assign name="quantity" expr="form_quantity"/>
+      </filled>
+
+      </field>
+ 
+      <field name="form_price" type="number"> 
+         <prompt>
+	How much do you want to sell your <value expr="quantity"/> <value expr="units"/> of <value expr="product"/>?
+	Enter the price and press hash
+     </prompt>
+     <filled>
+	<assign name="price" expr="form_price"/>
+      </filled>
+      </field>
+
+ <field name="form_duration" type="number"> 
+         <prompt>
+	How many days do you want you add to be online?
+	Enter number of days and press hash
+     </prompt>
+     <filled>
+	<assign name="duration" expr="form_duration"/>
+      </filled>
+      </field>
+
+<!-- "filled" event for form -->
+      <filled>
+  <goto next="#confirm"/>
+      </filled>
+
+   </form>
+
+<!-- confirmation form-->
+<menu id="confirm" scope="dialog" dtmf="true">
+<prompt>
+You have created an add for <value expr="quantity"/> <value expr="units"/> of <value expr="product"/> for <value expr="price"/> Gaana Seethese. It will stay online for <value expr="duration"/> days
+<break time="1000"/>
+To Confirm, Press 1
+<break time="1000"/>
+To Re-enter your offering, Press 2
+</prompt>
+
+<!-- listed choices are enumerated in order, 1 for save, 2 for menu_product-->
+<choice next="#save"></choice> <!--go to "save" form--> 
+<choice next="#menu_product"></choice> <!--back to main form--> 
+</menu>
+
+<!-- call php with data-->
+<form id="save">
+<block>
+<data name="phpsave" src="http://fsd.netau.net/eAfrica.php" namelist="user product quantity price duration" method="get"/>
+<goto next="#last"/>
+</block>
+</form>
+
+<!-- finish form-->
+<menu id="last" scope="dialog" dtmf="true">
+<prompt>
+Your Add has been posted online
+<break time="1000"/>
+To Enter another add, Press 1
+<break time="1000"/>
+To Finish, Press 2
+</prompt>
+<choice next="#menu_product"></choice>
+<choice event="end"></choice>
+</menu>
+
+</vxml>
