@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vxml version = "2.1" application="http://webhosting.voxeo.net/170418/www/root.vxml">
+
+<!-- set input to DTMF-->
+<property name="inputmodes" value="dtmf" />
+
+<!-- set variables for wav paths and extension-->
+<var name="path" expr="'wavs/'"/>
+<var name="ext" expr="'.wav'"/>
+
+<!-- event for product selection. in the event of products with different units of measurement, we would have other events-->
+<catch event="bag_product_selected"> 
+<prompt>
+.
+</prompt>
+<!-- assign various variables (product, units and associated wav files) for the selected product-->
+<assign name="product" expr="_message"/>
+<assign name="productwav" expr="path + _message + ext"/>
+<assign name="units" expr="'bags'"/>
+<assign name="askunitswav" expr="'wavs/how_many_bags_of.wav'" />
+<assign name="unitswav" expr="'wavs/bags.wav'" />
+
+<!-- go to form "details"-->
+<goto next="#details"/>
+</catch> 
+
+<!-- end event. close call-->
+<catch event="end"> 
+ <disconnect/> 
+</catch>
+
+<!-- product menu-->
+<menu id="menu_product" scope="dialog">
+
+<!-- play the associated wave file-->
+<prompt>
+<audio src="wavs/full_product_menu.wav"> <!-- to place an ad for Yam, press 1. to place an ad for Soy beans, press 2. to place an ad for Maize......-->
+<break time="1000"/>
+	</audio> 
+</prompt>
+
+<!-- DTMF choices, assigns selected product to "message" and calls "event"-->
+<choice event="bag_product_selected" dtmf="1" message="Yam"> </choice>
+<choice event="bag_product_selected" dtmf="2" message="Soybeans"></choice>
+<choice event="bag_product_selected" dtmf="3" message="Maize"></choice>
+<choice event="bag_product_selected" dtmf="4" message="Pepper"></choice>
+<choice event="bag_product_selected" dtmf="5" message="Rice"></choice>
+
+</menu>
+
+<!-- Main form for data input-->
+<form id="details">
+
+<!-- Quantity field-->
+      <field name="form_quantity" type="number">
+ <prompt> 
+   	 <audio expr="askunitswav"> <!-- how many <units> of -->
+      <break time="1000"/>
+    </audio> 
+     <audio expr="productwav"> <!-- <product> -->
+        <break time="1000"/>
+    </audio>
+ <audio src="wavs/enter_quantity_hash.wav"> <!--enter the quantity and press hash-->
+        <break time="1000"/>
+    </audio>
+</prompt>
+
+<!--"filled" event for quantity field-->
+   	<filled>
+<!--save entered value in variable-->
+ 	<assign name="quantity" expr="form_quantity"/>
+      </filled>
+   </field>
+ 
+<!--Price field-->
+      <field name="form_price" type="number"> 
+<prompt> 
+   	 <audio src="wavs/how_much.wav"> <!-- how much do you want to sell your-->
+      <break time="1000"/>
+    </audio> 
+	 <value expr="quantity"/> <!--entered quantity-->
+ 	 <audio expr="unitswav"> <!-- <units> -->
+      <break time="1000"/>
+    </audio> 
+<audio src="wavs/of.wav"> <!-- of -->
+      <break time="1000"/>
+    </audio> 
+ 	 <audio expr="productwav"> <!-- <product> -->
+      <break time="1000"/>
+    </audio> 
+ <audio src="wavs/enter_price_hash.wav"> <!--enter the price and press hash-->
+        <break time="1000"/>
+    </audio>
+   </prompt>
+
+<!--"filled event for price field-->
+     <filled>
+<!--save entered value in variable-->
+	<assign name="price" expr="form_price"/>
+      </filled>
+      </field>
+
+<!--Duration field-->
+    <field name="form_duration" type="number"> 
+<prompt> 
+   	 <audio src="wavs/how_long.wav"> <!--how many days should your ad stay online-->
+      <break time="1000"/>
+    </audio> 
+	 
+ <audio src="wavs/enter_duration_hash.wav"> <!--enter the number of days and press hash-->
+        <break time="1000"/>
+    </audio>
+   </prompt>
+
+<!--"filled" event for duration-->
+     <filled>
+<!--save entered value in variable-->
+	<assign name="duration" expr="form_duration"/>
+      </filled>
+      </field>
+
+<!-- "filled" event for entire form-->
+      <filled>
+  <goto next="#confirm"/> <!--go to confirm form-->
+      </filled>
+   </form>
+
+<!--Confirmation form-->
+<menu id="confirm" scope="dialog" dtmf="true">
+<prompt>
+ <audio src="wavs/confirm_start.wav"> <!--you have placed an ad for-->
+      <break time="1000"/>
+    </audio> 
+<value expr="quantity"/> <!-- <quantity> -->
+ <audio expr="unitswav"> <!-- <units> -->
+      <break time="1000"/>
+    </audio> 
+<audio src="wavs/of.wav">  <!-- of -->
+      <break time="1000"/>
+    </audio> 
+ 	 <audio expr="productwav">  <!-- <product> -->
+      <break time="1000"/>
+    </audio> 
+<audio src="wavs/for.wav"> <!-- for -->
+      <break time="1000"/>
+    </audio> 
+<value expr="price"/> <!-- <price> -->
+   <break time="1000"/>
+<audio src="wavs/cedis.wav"> <!-- Ghana Cedis (currency) -->
+      <break time="1000"/>
+    </audio> 
+<audio src="wavs/confirm_confirm.wav"> <!--to confirm, press one--> 
+      <break time="1000"/>
+    </audio> 
+<audio src="wavs/confirm_reject.wav"> <!--to re-enter your ad, press two--> 
+      <break time="1000"/>
+    </audio> 
+</prompt>
+
+<!-- listed choices are enumerated in order, 1 for save, 2 for menu_product-->
+<choice next="#save"></choice> <!--go to "save" form--> 
+<choice next="#menu_product"></choice> <!--back to main form--> 
+</menu>
+
+<!--"Save" form-->
+<form id="save">
+<block>
+<data name="phpsave" src="http://fsd.netau.net/eAfrica.php" namelist="user product quantity price duration" method="get"/> <!-- call php file and submit data-->
+<goto next="#last"/> <!-- go to "Last" form-->
+</block>
+</form>
+
+<!--Final form-->
+<menu id="last" scope="dialog" dtmf="true">
+<prompt>
+<audio src="wavs/ending.wav"> <!-- your ad has been placed online-->
+      <break time="1000"/>
+    </audio> 
+<audio src="wavs/new_ad.wav"> <!-- to enter new ad, press 1-->
+      <break time="1000"/>
+    </audio> 
+<audio src="wavs/finish.wav"> <!-- to exit the system, press 2-->
+      <break time="1000"/>
+    </audio> 
+</prompt>
+<choice next="#menu_product"></choice> <!--back to main form-->
+<choice event="end"></choice> <!--go to end event-->
+</menu>
+
+</vxml>
