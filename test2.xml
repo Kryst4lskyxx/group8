@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vxml version = "2.1">
+
+<meta name="maintainer" content="your_email_address@wherever.com" />
+
+<form id="userResponse">
+
+  <field name="votingResult">
+
+  <prompt>
+
+    Welcome to the voting session. If you agree with the previous question please press 1 or say 1. If you disagree please press 2 or say 2.
+
+  </prompt>
+
+     <!-- This grammar is specifically for recognizing dtmf. -->
+
+     <grammar xml:lang="en-US" root = "MYRULE" mode="dtmf">
+
+      <rule id="MYRULE" scope = "public">
+
+        <one-of>
+
+          <item> 1 </item>
+
+          <item> 2 </item>
+
+        </one-of>
+
+       </rule>
+
+     </grammar>
+
+     <!-- This grammar is specifically for recognizing voice on the same input as the dtmf. -->
+
+     <grammar xml:lang="en-US" root = "MYRULE" mode="voice">
+
+      <rule id="MYRULE" scope = "public">
+
+        <one-of>
+
+         <item> one </item>
+
+         <item> two </item>
+
+        </one-of>
+
+      </rule>
+
+    </grammar>
+
+  <noinput>
+
+   <prompt>
+
+    I did not hear you. Please try again.
+
+   </prompt>
+
+   <reprompt/>
+
+  </noinput>
+
+  <nomatch>
+
+   <prompt>
+
+    Is that a number? Please try again.
+
+   </prompt>
+
+   <reprompt/>
+
+  </nomatch>
+
+  </field>
+
+  <filled namelist="votingResult" mode="all">
+
+    <if cond="(votingResult == 'one' || votingResult == '1')">
+        You voted for yes.
+ 
+    <elseif cond="(votingResult == 'two' || votingResult == '2')" />
+        You voted for no.
+     
+    </if>
+    
+    <prompt>
+ 
+        Thank you! Goodbye!
+ 
+     </prompt>
+ 
+   </filled>
+
+</form>
+
+</vxml>
