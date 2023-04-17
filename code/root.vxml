@@ -2,13 +2,11 @@
 <vxml version="2.0">
 
 <!-- variables (shared between files in the system)-->
+<var name="vote"/>
 
-<var name="lang"/>
-<var name="user"/>
-<var name="product"/>
-<var name="quantity"/>
-<var name="price"/>
-<var name="duration"/>
-<var name="path"/>
-<var name="ext"/>
+<!-- end event-->
+<catch event="end"> 
+	<disconnect/> 
+</catch>
+
 </vxml>
