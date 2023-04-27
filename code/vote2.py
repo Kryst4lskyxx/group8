@@ -2,9 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+import os
 
+base_dir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, template_folder='template')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/petertesting/Desktop/group8-main77/test.db'  # 更改为你想要的路径
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(base_dir, '../test.db')
+
+
 db = SQLAlchemy(app)
 
 class Vote(db.Model):
@@ -35,9 +39,9 @@ def vote_management():
 @app.route('/vote_results/<int:vote_id>', methods=['GET', 'POST'])
 def vote_results(vote_id):
     vote = Vote.query.get(vote_id)
-    print(vote)
     if request.method == 'POST':
         print(request.form.get('vote'))
+
         form_data = request.form.to_dict()
         print(form_data)
         if request.form.get('vote') == 'yes':
@@ -47,7 +51,10 @@ def vote_results(vote_id):
             print(request.form)
             vote.no_votes += 1
         db.session.commit()
-    return render_template('vote_result.html', vote=vote)
+
+    votes = Vote.query.all()
+    return render_template('vote_result.html', vote=votes)
+    # return render_template('vote_result.html', vote=vote)
 
 if __name__ == '__main__':
     print('run')

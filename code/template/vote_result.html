@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote Results</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #F7F7F7;
+            color: #333333;
+        }
+        .container {
+            margin: 0 auto;
+            max-width: 600px;
+            padding: 50px;
+            background-color: #FFFFFF;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #CCCCCC;
+        }
+        th {
+            background-color: #F7F7F7;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Vote Results</h1>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Yes Votes</th>
+            <th>No Votes</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for vote1 in vote %}
+        <tr>
+            <td>{{ vote1.name }}</td>
+            <td>{{ vote1.yes_votes }}</td>
+            <td>{{ vote1.no_votes }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
