@@ -18,33 +18,49 @@ class Vote(db.Model):
     end_time = db.Column(db.DateTime, nullable=False)
     yes_votes = db.Column(db.Integer, default=0)
     no_votes = db.Column(db.Integer, default=0)
+    def is_active(self):
+        return self.start_time <= datetime.now() <= self.end_time
+
+
+
+
+@app.route('/show_alert')
+def show_alert():
+    alert_message = "Please check the time!"
+    return render_template('alert.html', message=alert_message)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def vote_management():
     print(',,,,')
     if request.method == 'POST':
-        print('sadasdsadasdasdasdasd')
         name = request.form['vote-name']
         # start_time = request.form['start-time']
         # end_time = request.form['end-time']
         start_time = datetime.strptime(request.form['start-time'], '%Y-%m-%dT%H:%M')
         end_time = datetime.strptime(request.form['end-time'], '%Y-%m-%dT%H:%M')
-        vote = Vote(name=name, start_time=start_time, end_time=end_time)
-        db.session.add(vote)
-        db.session.commit()
-        print('this_id',vote.id)
-        return redirect(url_for('vote_results', vote_id=vote.id))
+        if check_later(start_time,end_time):
+            vote = Vote(name=name, start_time=start_time, end_time=end_time)
+            db.session.add(vote)
+            db.session.commit()
+            print('this_id',vote.id)
+            return redirect(url_for('vote_results', vote_id=vote.id))
+        else:
+            print("wrong")
+            return redirect(url_for('show_alert'))
+
     return render_template('vote_manage.html')
 
 @app.route('/vote_results/<int:vote_id>', methods=['GET', 'POST'])
 def vote_results(vote_id):
     vote = Vote.query.get(vote_id)
-    if request.method == 'POST':
+    if request.method == 'POST' and vote.is_active():
         print(request.form.get('vote'))
 
         form_data = request.form.to_dict()
         print(form_data)
-        if request.form.get('vote') == 'yes':
+
+        if request.form.get('votingResult') == '1' or 'one':
             print(request.form)
             vote.yes_votes += 1
         else:
@@ -53,8 +69,19 @@ def vote_results(vote_id):
         db.session.commit()
 
     votes = Vote.query.all()
+
     return render_template('vote_result.html', vote=votes)
-    # return render_template('vote_result.html', vote=vote)
+
+
+def check_later(time1,time2):
+    return (time2 > time1)
+
+# def check_time(vote):
+#     current_time = datetime.now()
+#     print(vote.start_time <= current_time <= vote.end_time)
+#     return vote.start_time <= current_time <= vote.end_time
+
+
 
 if __name__ == '__main__':
     print('run')
