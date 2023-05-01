@@ -35,7 +35,8 @@ def vote_management():
     print(',,,,')
     if request.method == 'POST':
         name = request.form['vote-name']
-        # start_time = request.form['start-time']
+        print('copy')
+        # start_time = request.form ['start-time']
         # end_time = request.form['end-time']
         start_time = datetime.strptime(request.form['start-time'], '%Y-%m-%dT%H:%M')
         end_time = datetime.strptime(request.form['end-time'], '%Y-%m-%dT%H:%M')
@@ -51,11 +52,12 @@ def vote_management():
 
     return render_template('vote_manage.html')
 
-@app.route('/vote_results/<int:vote_id>', methods=['GET', 'POST'])
-def vote_results(vote_id):
+@app.route('/get_vote/<int:vote_id>', methods=['GET', 'POST'])
+
+def get_vote(vote_id):
     vote = Vote.query.get(vote_id)
     if request.method == 'POST' and vote.is_active():
-        print(request.form.get('vote'))
+        print(request.form.get('votingResult'))
 
         form_data = request.form.to_dict()
         print(form_data)
@@ -68,8 +70,19 @@ def vote_results(vote_id):
             vote.no_votes += 1
         db.session.commit()
 
-    votes = Vote.query.all()
+    # votes = Vote.query.all()
+    # render_template('vote_result.html', vote=votes)
+    # return 'cnm'
+    return "Hello, World!", 200
 
+
+@app.route('/vote_results/<int:vote_id>', methods=['GET', 'POST'])
+def vote_results(vote_id):
+    vote = Vote.query.get(vote_id)
+
+    votes = Vote.query.all()
+    # render_template('vote_result.html', vote=votes)
+    # return 'cnm'
     return render_template('vote_result.html', vote=votes)
 
 
@@ -87,4 +100,4 @@ if __name__ == '__main__':
     print('run')
     with app.app_context():
         db.create_all()
-    app.run(debug=True, port=5004)  # 尝试使用5001或其他未被使用的端口
+    app.run(host='0.0.0.0',debug=True, port=5004)
