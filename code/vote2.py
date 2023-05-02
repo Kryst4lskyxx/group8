@@ -73,7 +73,14 @@ def get_vote(vote_id):
     # votes = Vote.query.all()
     # render_template('vote_result.html', vote=votes)
     # return 'cnm'
-    return "Hello, World!", 200
+    return  '''<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+   <form>
+      <block>
+         <prompt>Thank you! Goodbye!</prompt>
+      </block>
+   </form>
+</vxml>''', 200
 
 
 @app.route('/vote_results/<int:vote_id>', methods=['GET', 'POST'])
