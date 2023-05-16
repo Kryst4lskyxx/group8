@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -7,7 +7,7 @@ import os
 base_dir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, template_folder='template')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(base_dir, '../test.db')
-
+app.config['SECRET_KEY'] = 'some-secret-key'
 
 db = SQLAlchemy(app)
 
@@ -36,20 +36,22 @@ def vote_management():
     if request.method == 'POST':
         name = request.form['vote-name']
         print('copy')
-        # start_time = request.form ['start-time']
-        # end_time = request.form['end-time']
         start_time = datetime.strptime(request.form['start-time'], '%Y-%m-%dT%H:%M')
         end_time = datetime.strptime(request.form['end-time'], '%Y-%m-%dT%H:%M')
         if check_later(start_time,end_time):
-            vote = Vote(name=name, start_time=start_time, end_time=end_time)
-            db.session.add(vote)
-            db.session.commit()
-            print('this_id',vote.id)
-            return redirect(url_for('vote_results', vote_id=vote.id))
+            active_votes = Vote.query.filter(Vote.start_time <= datetime.now(), Vote.end_time >= datetime.now()).all()
+            if len(active_votes) < 3:
+                vote = Vote(name=name, start_time=start_time, end_time=end_time)
+                db.session.add(vote)
+                db.session.commit()
+                print('this_id',vote.id)
+                return redirect(url_for('vote_results', vote_id=vote.id))
+            else:
+                flash("You can't have more than 3 active votes!")
+                return redirect(url_for('vote_management'))
         else:
             print("wrong")
             return redirect(url_for('show_alert'))
-
     return render_template('vote_manage.html')
 
 @app.route('/get_vote/<int:vote_id>', methods=['GET', 'POST'])
@@ -62,11 +64,14 @@ def get_vote(vote_id):
         form_data = request.form.to_dict()
         print(form_data)
 
-        if request.form.get('votingResult') == '1' or 'one':
+        if request.form.get('votingResult') == '1' or request.form.get('votingResult') == 'one':
             print(request.form)
+
             vote.yes_votes += 1
         else:
+            print('?????')
             print(request.form)
+            print(vote.no_votes)
             vote.no_votes += 1
         db.session.commit()
 

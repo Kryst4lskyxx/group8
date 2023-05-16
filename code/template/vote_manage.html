@@ -53,6 +53,15 @@
 </head>
 <body>
 	<div class="container">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <script>
+                    alert("{{ messages[0] }}");
+                </script>
+            {% endif %}
+        {% endwith %}
+
 		<h1>Vote Management</h1>
 		<form method="POST">
 			<label for="vote-name">Vote Name</label>
