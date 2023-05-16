@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+<meta name="maintainer" content="your_email_address@wherever.com" />
+
+<menu>
+<property name="inputmodes" value="dtmf"/>
+    <prompt>
+     For English service press 1, For French service press 2.
+     <break time="800"/>
+     <audio src="http://webhosting.voxeo.net/208875/www/my_audio/main_menu/a2.wav"/> 
+     <break time="800"/>
+    </prompt>
+    <choice dtmf="1" next="http://webhosting.voxeo.net/208875/www/english_menu.xml"/>
+    <choice dtmf="2" next="http://webhosting.voxeo.net/208875/www/french_menu.xml"/>
+
+  <noinput>
+    <prompt>
+        Please choose one of the languages.
+        <break time="500"/>
+     <audio src="http://webhosting.voxeo.net/208875/www/my_audio/main_menu/a3.wav"/> 
+    </prompt>
+    
+  </noinput>
+  <reprompt/>
+
+  <nomatch>
+    <prompt>
+        Is that a number? Please try again.
+        <break time="500"/>
+     <audio src="http://webhosting.voxeo.net/208875/www/my_audio/main_menu/a4.wav"/> 
+    </prompt>
+  </nomatch>
+</menu>
+</vxml>

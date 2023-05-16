@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
+
+<meta name="maintainer" content="your_email_address@wherever.com" />
+
+<form id="userResponse">
+
+  <field name="votingResult">
+
+  <prompt>
+
+    <!-- Welcome to the voting session. If you agree with the previous question please press 1 or say 1. If you disagree please press 2 or say 2. -->
+    <audio src="http://webhosting.voxeo.net/208875/www/my_audio/french_menu/french_menu_a1.wav"/> 
+
+  </prompt>
+
+     <!-- This grammar is specifically for recognizing dtmf. -->
+
+     <grammar xml:lang="en-US" root = "MYRULE" mode="dtmf">
+
+      <rule id="MYRULE" scope = "public">
+
+        <one-of>
+
+          <item> 1 </item>
+
+          <item> 2 </item>
+
+        </one-of>
+
+       </rule>
+
+     </grammar>
+
+     <!-- This grammar is specifically for recognizing voice on the same input as the dtmf. -->
+
+     <grammar xml:lang="en-US" root = "MYRULE" mode="voice">
+
+      <rule id="MYRULE" scope = "public">
+
+        <one-of>
+
+         <item> one </item>
+
+         <item> two </item>
+
+        </one-of>
+
+      </rule>
+
+    </grammar>
+
+  <noinput>
+
+   <prompt>
+
+    <!-- I did not hear you. Please try again. -->
+    <audio src="http://webhosting.voxeo.net/208875/www/my_audio/french_menu/french_menu_a2.wav"/> 
+
+
+   </prompt>
+
+   <reprompt/>
+
+  </noinput>
+
+  <nomatch>
+
+   <prompt>
+
+    <!-- Is that a number? Please try again. -->
+     <audio src="http://webhosting.voxeo.net/208875/www/my_audio/main_menu/a4.wav"/> 
+
+
+   </prompt>
+
+   <reprompt/>
+
+  </nomatch>
+
+  </field>
+
+  <filled namelist="votingResult" mode="all">
+
+    <if cond="(votingResult == 'one' || votingResult == '1')">
+        <!-- You voted for yes. -->
+      <audio src="http://webhosting.voxeo.net/208875/www/my_audio/french_menu/french_menu_a3.wav"/> 
+      <submit next="http://13.37.211.137:5004/get_vote/9" namelist="votingResult" method="post"/>
+
+
+ 
+    <elseif cond="(votingResult == 'two' || votingResult == '2')" />
+        <!-- You voted for no. -->
+        <audio src="http://webhosting.voxeo.net/208875/www/my_audio/french_menu/french_menu_a4.wav"/> 
+        <submit next="http://13.37.211.137:5004/get_vote/9" namelist="votingResult" method="post"/>
+
+
+     
+    </if>
+    
+    <prompt>
+ 
+        <!-- Thank you! Goodbye! -->
+      <audio src="http://webhosting.voxeo.net/208875/www/my_audio/french_menu/french_menu_a5.wav"/> 
+
+ 
+     </prompt>
+ 
+   </filled>
+
+</form>
+
+</vxml>
