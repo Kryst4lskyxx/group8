@@ -24,61 +24,75 @@ class Vote(db.Model):
 
 
 
+
 @app.route('/show_alert')
 def show_alert():
     alert_message = "Please check the time!"
     return render_template('alert.html', message=alert_message)
 
 
+# def voting_control()
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def vote_management():
     print(',,,,')
-    if request.method == 'POST':
-        name = request.form['vote-name']
-        print('copy')
-        start_time = datetime.strptime(request.form['start-time'], '%Y-%m-%dT%H:%M')
-        end_time = datetime.strptime(request.form['end-time'], '%Y-%m-%dT%H:%M')
-        if check_later(start_time,end_time):
-            active_votes = Vote.query.filter(Vote.start_time <= datetime.now(), Vote.end_time >= datetime.now()).all()
-            if len(active_votes) < 3:
-                vote = Vote(name=name, start_time=start_time, end_time=end_time)
-                db.session.add(vote)
-                db.session.commit()
-                print('this_id',vote.id)
-                return redirect(url_for('vote_results', vote_id=vote.id))
+    try:
+        if request.method == 'POST':
+            name = request.form['vote-name']
+            print('copy')
+            start_time = datetime.strptime(request.form['start-time'], '%Y-%m-%dT%H:%M')
+            end_time = datetime.strptime(request.form['end-time'], '%Y-%m-%dT%H:%M')
+            if check_later(start_time,end_time) and check_later(start_time,datetime.now()):
+                active_votes = Vote.query.filter(Vote.start_time <= datetime.now(), Vote.end_time >= datetime.now()).all()
+                # print(active_votes[0].id)
+                if len(active_votes) < 3:
+                    vote = Vote(name=name, start_time=start_time, end_time=end_time)
+                    db.session.add(vote)
+                    db.session.commit()
+                    print('this_id',vote.id)
+                    return redirect(url_for('vote_results', vote_id=vote.id))
+                else:
+                    flash("You can not have more than 3 active votes!")
+                    return redirect(url_for('vote_management'))
             else:
-                flash("You can't have more than 3 active votes!")
-                return redirect(url_for('vote_management'))
-        else:
-            print("wrong")
-            return redirect(url_for('show_alert'))
+                print("wrong")
+                return redirect(url_for('show_alert'))
+
+    except Exception as e:
+        print(str(e))
+
+        flash("Wrong data formation")
     return render_template('vote_manage.html')
 
-@app.route('/get_vote/<int:vote_id>', methods=['GET', 'POST'])
+@app.route('/get_vote/<int:index>', methods=['GET', 'POST'])
 
-def get_vote(vote_id):
-    vote = Vote.query.get(vote_id)
-    if request.method == 'POST' and vote.is_active():
-        print(request.form.get('votingResult'))
+def get_vote(index):
+    try:
+        active_votes = Vote.query.filter(Vote.start_time <= datetime.now(), Vote.end_time >= datetime.now()).all()
+        vote = active_votes[index-1]
+        if request.method == 'POST' and vote.is_active():
+            print(request.form.get('votingResult'))
 
-        form_data = request.form.to_dict()
-        print(form_data)
+            form_data = request.form.to_dict()
+            print(form_data)
 
-        if request.form.get('votingResult') == '1' or request.form.get('votingResult') == 'one':
-            print(request.form)
+            if request.form.get('votingResult') == '1' or request.form.get('votingResult') == 'one':
+                print(request.form)
 
-            vote.yes_votes += 1
-        else:
-            print('?????')
-            print(request.form)
-            print(vote.no_votes)
-            vote.no_votes += 1
-        db.session.commit()
+                vote.yes_votes += 1
+            else:
+                print('?????')
+                print(request.form)
+                print(vote.no_votes)
+                vote.no_votes += 1
+            db.session.commit()
 
-    # votes = Vote.query.all()
-    # render_template('vote_result.html', vote=votes)
-    # return 'cnm'
-    return  '''<?xml version="1.0"?>
+        # votes = Vote.query.all()
+        # render_template('vote_result.html', vote=votes)
+        # return 'cnm'
+        return  '''<?xml version="1.0"?>
 <vxml version="2.0" xmlns="http://www.w3.org/2001/vxml">
    <form>
       <block>
@@ -86,11 +100,14 @@ def get_vote(vote_id):
       </block>
    </form>
 </vxml>''', 200
+    except Exception as e:
+        print(str(e))
+        print(str('The index should be no bigger than 3.'))
 
 
 @app.route('/vote_results/<int:vote_id>', methods=['GET', 'POST'])
 def vote_results(vote_id):
-    vote = Vote.query.get(vote_id)
+    # vote = Vote.query.get(vote_id)
 
     votes = Vote.query.all()
     # render_template('vote_result.html', vote=votes)
