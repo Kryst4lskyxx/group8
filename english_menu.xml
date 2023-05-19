@@ -4,13 +4,76 @@
 
 <meta name="maintainer" content="your_email_address@wherever.com" />
 
+<var name="currentTopic" />
+
+<form id="topicChoose">
+
+  <field name="topic">
+
+  <prompt>
+
+    Plese enter 1 or 2 or 3 to choose the topic you want to vote.
+
+  </prompt>
+  <grammar xml:lang="en-US" root = "MYRULE" mode="dtmf">
+
+      <rule id="MYRULE" scope = "public">
+
+        <one-of>
+
+          <item> 1 </item>
+
+          <item> 2 </item>
+          <item> 3 </item>
+
+        </one-of>
+
+       </rule>
+
+     </grammar>
+
+  <noinput>
+
+   <prompt>
+
+    I did not hear you. Please try again.
+
+   </prompt>
+
+   <reprompt/>
+
+  </noinput>
+
+  <nomatch>
+
+   <prompt>
+
+    Is that a number? Please try again.
+
+   </prompt>
+
+   <reprompt/>
+
+  </nomatch>
+
+  </field>
+
+  <filled namelist="topic" mode="all">
+
+    <assign name="currentTopic" expr="topic" />
+    <goto next="#userResponse"/>
+ 
+   </filled>
+
+</form>
+
 <form id="userResponse">
 
   <field name="votingResult">
 
   <prompt>
 
-    Welcome to the voting session. If you agree with the previous question please press 1 or say 1. If you disagree please press 2 or say 2.
+    You have chosen topic <value expr="currentTopic"/>. Welcome to the voting session. If you agree with the previous question please press 1 or say 1. If you disagree please press 2 or say 2.
 
   </prompt>
 
@@ -77,15 +140,37 @@
   </field>
 
   <filled namelist="votingResult" mode="all">
+    <if cond="currentTopic == '1'">
+      <if cond="(votingResult == 'one' || votingResult == '1')">
+          You voted for yes.
+          <submit next="http://13.37.211.137:5004/get_vote/1" namelist="votingResult" method="post"/>
+  
+      <elseif cond="(votingResult == 'two' || votingResult == '2')" />
+          You voted for no.
+          <submit next="http://13.37.211.137:5004/get_vote/1" namelist="votingResult" method="post"/>
+      </if>
+    </if>
 
-    <if cond="(votingResult == 'one' || votingResult == '1')">
-        You voted for yes.
-        <submit next="http://13.37.211.137:5004/get_vote/9" namelist="votingResult" method="post"/>
- 
-    <elseif cond="(votingResult == 'two' || votingResult == '2')" />
-        You voted for no.
-        <submit next="http://13.37.211.137:5004/get_vote/9" namelist="votingResult" method="post"/>
-     
+    <if cond="currentTopic == '2'">
+      <if cond="(votingResult == 'one' || votingResult == '1')">
+          You voted for yes.
+          <submit next="http://13.37.211.137:5004/get_vote/2" namelist="votingResult" method="post"/>
+  
+      <elseif cond="(votingResult == 'two' || votingResult == '2')" />
+          You voted for no.
+          <submit next="http://13.37.211.137:5004/get_vote/2" namelist="votingResult" method="post"/>
+      </if>
+    </if>
+
+    <if cond="currentTopic == '3'">
+      <if cond="(votingResult == 'one' || votingResult == '1')">
+          You voted for yes.
+          <submit next="http://13.37.211.137:5004/get_vote/3" namelist="votingResult" method="post"/>
+  
+      <elseif cond="(votingResult == 'two' || votingResult == '2')" />
+          You voted for no.
+          <submit next="http://13.37.211.137:5004/get_vote/3" namelist="votingResult" method="post"/>
+      </if>
     </if>
     
     <prompt>
